@@ -147,7 +147,7 @@ const Login: React.FC = () => {
           </div>
 
           {/* Helper Section */}
-          <div className="mt-12 pt-8 border-t border-gray-100 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+          {/* <div className="mt-12 pt-8 border-t border-gray-100 animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center mb-6">Environment Access</p>
             <div className="grid grid-cols-2 gap-4">
               <button 
@@ -155,7 +155,7 @@ const Login: React.FC = () => {
                 className="p-4 bg-white border border-gray-100 rounded-2xl text-left hover:border-blue-500 hover:shadow-lg transition-all group"
               >
                 <p className="text-[10px] font-black text-blue-600 uppercase mb-1">Root Admin</p>
-                <p className="text-[11px] font-bold text-gray-500 truncate">admin@smarttrack.com</p>
+                <p className="text-[11px] font-bold text-gray-500 truncate">admin@gmail.com</p>
               </button>
               <button 
                 onClick={() => fillCredentials('employee@smarttrack.com', 'admin123')}
@@ -171,7 +171,7 @@ const Login: React.FC = () => {
                 <i className="fab fa-google text-xl"></i>
                 <i className="fab fa-microsoft text-xl"></i>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
