@@ -57,14 +57,18 @@ export const api = {
     return res.json();
   },
 
-  async updateUser(userId: string, updates: Partial<User & { password?: string }>): Promise<void> {
+   async updateUser(userId: string, updates: Partial<User & { password?: string }>): Promise<void> {
     const res = await fetch(`${API_BASE}/users/${userId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates)
     });
-    if (!res.ok) throw new Error('Update failed');
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Update failed on server');
+    }
   },
+
 
   async markCheckIn(userId: string): Promise<AttendanceRecord> {
     const res = await fetch(`${API_BASE}/attendance/check-in`, {

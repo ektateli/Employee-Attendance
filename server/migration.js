@@ -12,11 +12,13 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(100) UNIQUE NOT NULL,
   password VARCHAR(255) NOT NULL,
   role ENUM('ADMIN', 'EMPLOYEE') DEFAULT 'EMPLOYEE',
-  avatar VARCHAR(255),
+  avatar LONGTEXT,
   department VARCHAR(100),
   joined_date DATE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE users MODIFY COLUMN avatar LONGTEXT;
 
 CREATE TABLE IF NOT EXISTS attendance (
   id VARCHAR(50) PRIMARY KEY,
@@ -45,7 +47,7 @@ CREATE TABLE IF NOT EXISTS leaves (
 
 -- Seed Admin
 REPLACE INTO users (id, name, email, password, role, avatar, department, joined_date)
-VALUES ('admin-1', 'System Admin', 'admin@smarttrack.com', 'admin123', 'ADMIN', 'https://i.pravatar.cc/150?u=admin', 'Management', '2023-01-01');
+VALUES ('admin-1', 'System Admin', 'admin@gmail.com', 'admin123', 'ADMIN', 'https://i.pravatar.cc/150?u=admin', 'Management', '2023-01-01');
 
 -- Seed Sample Employee
 REPLACE INTO users (id, name, email, password, role, avatar, department, joined_date)
@@ -64,7 +66,7 @@ async function runMigration() {
     console.log('🚀 Running database migrations...');
     await connection.query(schema);
     console.log('✅ Migration successful: smarttrack_db is ready.');
-    console.log('👤 Admin Seeded: admin@smarttrack.com / admin123');
+    console.log('👤 Admin Seeded: admin@gmail.com / admin123');
     console.log('👤 Employee Seeded: employee@smarttrack.com / admin123');
   } catch (err) {
     console.error('❌ Migration failed:', err.message);

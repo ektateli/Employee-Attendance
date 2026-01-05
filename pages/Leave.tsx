@@ -20,7 +20,7 @@ const LeavePage: React.FC = () => {
     const data = auth.user.role === UserRole.ADMIN 
       ? await api.getLeaves() 
       : await api.getLeaves(auth.user.id);
-    setLeaves(data.sort((a, b) => new Date(b.appliedDate).getTime() - new Date(a.appliedDate).getTime()));
+    setLeaves(data.sort((a, b) => new Date(b.applied_date).getTime() - new Date(a.applied_date).getTime()));
   };
 
   useEffect(() => {
@@ -87,7 +87,7 @@ const LeavePage: React.FC = () => {
               <tr key={leave.id} className="hover:bg-gray-50/50">
                 <td className="px-6 py-4">
                   <span className="text-sm font-semibold text-gray-800">{leave.userName}</span>
-                  <p className="text-[10px] text-gray-400">Applied: {new Date(leave.appliedDate).toLocaleDateString()}</p>
+                  <p className="text-[10px] text-gray-400">Applied: {new Date(leave.applied_date).toLocaleDateString()}</p>
                 </td>
                 <td className="px-6 py-4">
                   <span className="text-xs font-medium text-gray-600">{leave.type}</span>

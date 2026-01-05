@@ -697,7 +697,7 @@
 
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../App';
 import { api } from '../services/api';
 import { AttendanceRecord } from '../types';
@@ -712,7 +712,9 @@ const AttendancePage: React.FC = () => {
   // Security State
   const [newPassword, setNewPassword] = useState('');
   const [passLoading, setPassLoading] = useState(false);
+   const [avatarLoading, setAvatarLoading] = useState(false);
   const [passMessage, setPassMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchSessionData = async () => {
     if (!auth.user) return;
@@ -782,6 +784,64 @@ const AttendancePage: React.FC = () => {
       alert("Database communication failed. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+    // Helper function to compress and resize images on the client
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_SIZE = 400; // Small square is perfect for profile pictures
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.8)); // High quality but compressed
+        };
+        img.onerror = reject;
+      };
+      reader.onerror = reject;
+    });
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && auth.user) {
+      setAvatarLoading(true);
+      try {
+        const base64 = await compressImage(file);
+        await api.updateUser(auth.user.id, { avatar: base64 });
+        
+        // Update local storage and UI
+        const updatedUser = { ...auth.user, avatar: base64 };
+        localStorage.setItem('st_user', JSON.stringify(updatedUser));
+        window.location.reload(); 
+      } catch (err: any) {
+        console.error("Avatar upload error:", err);
+        alert(`Failed to update profile picture: ${err.message}. If it's a size error, ensure MySQL max_allowed_packet is increased.`);
+      } finally {
+        setAvatarLoading(false);
+      }
     }
   };
 
@@ -916,6 +976,26 @@ const AttendancePage: React.FC = () => {
           <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center">
             <i className="fas fa-user-circle text-blue-500 mr-3"></i> Profile Details
           </h3>
+               <div className="flex flex-col items-center mb-8">
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className="group relative w-24 h-24 rounded-3xl overflow-hidden cursor-pointer shadow-lg border-4 border-white mb-3"
+            >
+              <img src={auth.user?.avatar} className="w-full h-full object-cover" alt="Avatar" />
+              <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <i className="fas fa-camera text-white text-xl mb-1"></i>
+                <span className="text-[8px] text-white font-black uppercase">Change</span>
+              </div>
+            </div>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept="image/*"
+              onChange={handleAvatarChange}
+            />
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Click photo to update</p>
+          </div>
           <div className="space-y-4">
              <div className="flex justify-between items-center py-3 border-b border-gray-50">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Employee ID</span>
@@ -953,7 +1033,7 @@ const AttendancePage: React.FC = () => {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                 />
-                <button type="submit" disabled={passLoading || !newPassword} className="absolute right-2 top-1.5 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-all">
+                <button type="submit" disabled={passLoading || !newPassword} className="absolute right-2 top-0.3 mt-1  p-1.5  bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-all">
                   {passLoading ? <i className="fas fa-spinner fa-spin text-xs"></i> : <i className="fas fa-arrow-right text-xs"></i>}
                 </button>
               </div>

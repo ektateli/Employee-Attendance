@@ -1,15 +1,19 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuth } from '../App';
 import { Navigate, useLocation } from 'react-router-dom';
 
 const Login: React.FC = () => {
   const [isRegistering, setIsRegistering] = useState(false);
-  const [email, setEmail] = useState('admin@smarttrack.com');
+  const [email, setEmail] = useState('admin@gmail.com');
   const [password, setPassword] = useState('admin123');
   const [name, setName] = useState('');
   const [department, setDepartment] = useState('Engineering');
   const [loading, setLoading] = useState(false);
+  
+  const [avatar, setAvatar] = useState<string | null>(null);
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { auth, login, register } = useAuth();
   const location = useLocation();
@@ -18,7 +22,16 @@ const Login: React.FC = () => {
     const origin = (location.state as any)?.from?.pathname || '/';
     return <Navigate to={origin} replace />;
   }
-
+ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatar(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -55,13 +68,13 @@ const Login: React.FC = () => {
         </div>
         <div className="z-10 bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10">
            <p className="text-sm italic opacity-90">"The easiest way to track time and optimize performance for our modern distributed team."</p>
-           <div className="mt-4 flex items-center space-x-3">
+           {/* <div className="mt-4 flex items-center space-x-3">
               <div className="w-8 h-8 rounded-full bg-blue-400"></div>
               <div>
                 <p className="text-xs font-bold">Marcus Chen</p>
                 <p className="text-[10px] opacity-60">Director of Ops</p>
               </div>
-           </div>
+           </div> */}
         </div>
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2 animate-pulse"></div>
       </div>
@@ -71,11 +84,39 @@ const Login: React.FC = () => {
         <div className="w-full max-w-md">
           <div className="text-center mb-10 animate-fade-in">
             <h2 className="text-4xl font-black text-gray-900 mb-2">{isRegistering ? 'Join the Team' : 'Welcome Back'}</h2>
-            <p className="text-gray-500 font-medium">{isRegistering ? 'Create your employee account' : 'Access your smarttrack_db session'}</p>
+            <p className="text-gray-500 font-medium">{isRegistering ? 'Create your employee account' : 'Access your s session'}</p>
           </div>
 
           <div className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-blue-900/5 border border-gray-100 transition-all">
             <form onSubmit={handleSubmit} className="space-y-4">
+              {isRegistering && (
+                <div className="flex flex-col items-center mb-6 animate-slide-up">
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="group relative w-24 h-24 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer overflow-hidden hover:border-blue-500 transition-all"
+                  >
+                    {avatar ? (
+                      <img src={avatar} className="w-full h-full object-cover" alt="Preview" />
+                    ) : (
+                      <div className="text-center">
+                        <i className="fas fa-camera text-gray-400 mb-1"></i>
+                        <p className="text-[8px] font-bold text-gray-400 uppercase">Photo</p>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <i className="fas fa-plus text-white text-sm"></i>
+                    </div>
+                  </div>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                  <p className="text-[9px] font-bold text-gray-400 mt-2 uppercase tracking-widest">Select Profile Picture</p>
+                </div>
+              )}
               {isRegistering && (
                 <div className="animate-slide-up">
                   <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Full Name</label>

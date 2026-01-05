@@ -864,6 +864,8 @@ app.put('/api/users/:id', async (req, res) => {
     await pool.query(query, params);
     res.json({ message: 'User updated successfully' });
   } catch (err) {
+    // CRITICAL: Log error to console so we can see why it failed (e.g. column size or packet size)
+    console.error(`Error updating user ${id}:`, err);
     res.status(500).json({ error: err.message });
   }
 });
